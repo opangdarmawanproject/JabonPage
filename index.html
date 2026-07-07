@@ -124,6 +124,12 @@
             width: 100%;
             height: 250px;
             object-fit: cover;
+            cursor: zoom-in; /* Menambahkan kursor zoom saat di-hover */
+            transition: filter 0.3s;
+        }
+        
+        .woodcut-img:hover {
+            filter: grayscale(0%) contrast(120%) brightness(100%);
         }
 
         /* Menyembunyikan elemen berdasarkan filter */
@@ -141,6 +147,20 @@
             height: 450px;
             object-fit: cover;
             background: #000;
+        }
+
+        /* Modal Image Customization */
+        #modal-image {
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+        }
+        
+        #modal-img-container {
+            cursor: grab;
+        }
+        
+        #modal-img-container:active {
+            cursor: grabbing;
         }
     </style>
 </head>
@@ -209,37 +229,37 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
                     <!-- Item 1 -->
                     <div class="woodcut-card portfolio-item" data-category="cukil-kayu">
-                        <img src="https://picsum.photos/seed/wood1/400/300?grayscale" alt="Cukil Kayu" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/wood1/800/600?grayscale" alt="Cukil Kayu" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Wajah Rimba</h3>
                         <p class="text-black text-sm">Cukil Kayu (MDF) - 2024</p>
                     </div>
                     <!-- Item 2 -->
                     <div class="woodcut-card portfolio-item" data-category="linocut">
-                        <img src="https://picsum.photos/seed/lino1/400/300?grayscale" alt="Linocut" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/lino1/800/600?grayscale" alt="Linocut" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Kota Bising</h3>
                         <p class="text-black text-sm">Linocut - 2023</p>
                     </div>
                     <!-- Item 3 -->
                     <div class="woodcut-card portfolio-item" data-category="stempel">
-                        <img src="https://picsum.photos/seed/stamp1/400/300?grayscale" alt="Stempel" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/stamp1/800/600?grayscale" alt="Stempel" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Cap Persona</h3>
                         <p class="text-black text-sm">Stempel Karet - 2023</p>
                     </div>
                     <!-- Item 4 -->
                     <div class="woodcut-card portfolio-item" data-category="sketsa">
-                        <img src="https://picsum.photos/seed/sketch1/400/300?grayscale" alt="Sketsa" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/sketch1/800/600?grayscale" alt="Sketsa" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Studi Kasar</h3>
                         <p class="text-black text-sm">Tinta di Kertas - 2024</p>
                     </div>
                     <!-- Item 5 -->
                     <div class="woodcut-card portfolio-item" data-category="cukil-kayu">
-                        <img src="https://picsum.photos/seed/wood2/400/300?grayscale" alt="Cukil Kayu 2" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/wood2/800/600?grayscale" alt="Cukil Kayu 2" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Akar Pahit</h3>
                         <p class="text-black text-sm">Cukil Kayu Jati - 2022</p>
                     </div>
                     <!-- Item 6 -->
                     <div class="woodcut-card portfolio-item" data-category="linocut">
-                        <img src="https://picsum.photos/seed/lino2/400/300?grayscale" alt="Linocut 2" class="woodcut-img mb-4">
+                        <img src="https://picsum.photos/seed/lino2/800/600?grayscale" alt="Linocut 2" class="woodcut-img mb-4">
                         <h3 class="text-xl font-woodcut text-black">Mata Malam</h3>
                         <p class="text-black text-sm">Linocut - 2024</p>
                     </div>
@@ -285,6 +305,21 @@
         </footer>
     </div>
 
+    <!-- 3. MODAL PREVIEW GAMBAR (Baru Ditambahkan) -->
+    <div id="image-modal" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <!-- Tombol Kontrol -->
+        <div class="absolute top-4 right-4 flex gap-2 z-10">
+            <button id="zoom-in-btn" class="woodcut-btn woodcut-edge !px-4 text-xl" title="Zoom In">+</button>
+            <button id="zoom-out-btn" class="woodcut-btn woodcut-edge !px-4 text-xl" title="Zoom Out">-</button>
+            <button id="close-modal-btn" class="woodcut-btn woodcut-edge !px-4 text-[var(--wood-red)]" title="Tutup">X</button>
+        </div>
+        
+        <!-- Kontainer Gambar -->
+        <div id="modal-img-container" class="w-full h-full flex items-center justify-center overflow-hidden relative">
+            <img id="modal-image" src="" alt="Preview Gambar" class="max-w-[90vw] max-h-[90vh] object-contain border-4 border-[var(--paper-cream)] woodcut-edge">
+        </div>
+    </div>
+
     <!-- JavaScript Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -293,12 +328,10 @@
             const phrase = "JABON MAIN YUK";
             const container = document.getElementById('interactive-text');
             let litCount = 0;
-            const targetCount = phrase.replace(/\s/g, '').length; // Jumlah huruf tanpa spasi
+            const targetCount = phrase.replace(/\s/g, '').length; 
             
-            // Inisialisasi AudioContext (Hanya diizinkan setelah interaksi pengguna)
             let audioCtx = null;
 
-            // Fungsi untuk membuat suara (Synthesizer Chiptune/Retro)
             function playSound(index) {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -307,51 +340,44 @@
                     audioCtx.resume();
                 }
 
-                // Membuat nada dasar berdasarkan indeks huruf agar nadanya berbeda-beda
-                const baseFreq = 220; // A3
-                const freq = baseFreq * Math.pow(1.05946, index * 2); // Naik beberapa semitone
+                const baseFreq = 220;
+                const freq = baseFreq * Math.pow(1.05946, index * 2);
 
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
 
-                osc.type = 'square'; // Suara kasar cocok untuk gaya ukiran kayu
+                osc.type = 'square';
                 osc.frequency.value = freq;
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
 
                 osc.start();
-                // Envelope suara cepat (Beep/Bloop)
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
                 osc.stop(audioCtx.currentTime + 0.3);
             }
 
-            // Membuat elemen huruf HTML
             Array.from(phrase).forEach((char, index) => {
                 if (char === ' ') {
-                    // Spasi
                     const space = document.createElement('div');
-                    space.style.width = '30px'; // Lebar spasi
+                    space.style.width = '30px';
                     container.appendChild(space);
                 } else {
                     const span = document.createElement('span');
                     span.textContent = char;
                     span.className = 'intro-letter';
                     
-                    // Event saat huruf diklik
                     span.addEventListener('click', function() {
                         if (!this.classList.contains('lit')) {
                             this.classList.add('lit');
                             playSound(index);
                             litCount++;
                             
-                            // Cek jika semua huruf sudah menyala
                             if (litCount === targetCount) {
-                                setTimeout(revealMainContent, 800); // Tunggu sebentar lalu buka
+                                setTimeout(revealMainContent, 800);
                             }
                         } else {
-                            // Opsional: mainkan suara lagi jika diklik ulang
                             playSound(index);
                         }
                     });
@@ -360,7 +386,6 @@
                 }
             });
 
-            // Fungsi untuk transisi ke halaman utama
             function revealMainContent() {
                 const introScreen = document.getElementById('intro-screen');
                 const mainContent = document.getElementById('main-content');
@@ -371,18 +396,16 @@
                     introScreen.style.display = 'none';
                     
                     mainContent.classList.remove('hidden');
-                    // Paksa reflow
                     void mainContent.offsetWidth;
                     mainContent.classList.remove('opacity-0');
                     mainContent.classList.add('opacity-100');
                     
-                    // Mainkan suara kencang tanda berhasil masuk
                     if(audioCtx) {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(110, audioCtx.currentTime); // Low A
-                        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5); // Slide up
+                        osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5);
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
                         osc.start();
@@ -390,7 +413,7 @@
                         gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
                         osc.stop(audioCtx.currentTime + 0.5);
                     }
-                }, 1000); // Sesuai dengan durasi CSS transition
+                }, 1000); 
             }
 
 
@@ -400,9 +423,7 @@
 
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // Hapus active class dari semua tombol
                     filterBtns.forEach(b => b.classList.remove('active'));
-                    // Tambah active class ke tombol yang diklik
                     btn.classList.add('active');
 
                     const filterValue = btn.getAttribute('data-filter');
@@ -416,6 +437,102 @@
                     });
                 });
             });
+
+            // --- 3. LOGIKA PREVIEW GAMBAR (MODAL & ZOOM) ---
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            const imgContainer = document.getElementById('modal-img-container');
+            const closeBtn = document.getElementById('close-modal-btn');
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            const woodcutImages = document.querySelectorAll('.woodcut-img');
+            
+            let currentScale = 1;
+            let isDragging = false;
+            let startX, startY, translateX = 0, translateY = 0;
+
+            // Buka Modal
+            woodcutImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    // Gunakan gambar versi berwarna/hilangkan filter CSS-nya untuk preview
+                    modalImg.src = img.src;
+                    currentScale = 1;
+                    translateX = 0;
+                    translateY = 0;
+                    updateTransform();
+                    
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.style.overflow = 'hidden'; // Kunci scroll halaman belakang
+                });
+            });
+
+            // Tutup Modal
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modalImg.src = '';
+                document.body.style.overflow = ''; // Kembalikan scroll halaman
+            };
+
+            closeBtn.addEventListener('click', closeModal);
+            
+            // Tutup jika area luar gambar diklik
+            imgContainer.addEventListener('click', (e) => {
+                if (e.target === imgContainer) closeModal();
+            });
+
+            // Fungsi Update Transform (Zoom & Pan)
+            const updateTransform = () => {
+                modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+            };
+
+            // Logika Tombol Zoom In/Out
+            zoomInBtn.addEventListener('click', () => {
+                currentScale += 0.5;
+                if (currentScale > 4) currentScale = 4; // Max zoom
+                updateTransform();
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                currentScale -= 0.5;
+                if (currentScale < 0.5) currentScale = 0.5; // Min zoom
+                updateTransform();
+            });
+
+            // Zoom menggunakan Scroll Mouse (Wheel)
+            imgContainer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    currentScale += 0.2; // Zoom in
+                    if (currentScale > 4) currentScale = 4;
+                } else {
+                    currentScale -= 0.2; // Zoom out
+                    if (currentScale < 0.5) currentScale = 0.5;
+                }
+                updateTransform();
+            });
+
+            // Logika Dragging (Pan) saat di-zoom
+            imgContainer.addEventListener('mousedown', (e) => {
+                if(e.target === modalImg) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
         });
     </script>
 </body>
