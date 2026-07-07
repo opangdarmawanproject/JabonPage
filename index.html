@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JABON PAGE - Woodcut Portfolio</title>
+    <!-- Menggunakan font Google yang cocok dengan gaya ukiran kayu/rustic -->
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ink-black: #111111;
+            --paper-cream: #f4ebd8;
+            --wood-red: #c23b22;
+        }
+
+        /* SVG Filter untuk memberikan efek tepi kasar (woodcut effect) pada elemen */
+        .woodcut-edge {
+            filter: url(#rough-edge);
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+            margin: 0;
+            overflow-x: hidden;
+            /* Tekstur noise ringan (base64 SVG) */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        h1, h2, h3, .font-woodcut {
+            font-family: 'Rye', serif;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tampilan Layar Intro */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--ink-black);
+            color: var(--paper-cream);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            transition: opacity 1s ease-in-out, visibility 1s;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        }
+
+        .intro-text-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            max-width: 90%;
+        }
+
+        .intro-letter {
+            font-family: 'Rye', serif;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            padding: 10px;
+            border: 2px solid transparent;
+        }
+
+        @media (min-width: 768px) {
+            .intro-letter { font-size: 6rem; }
+        }
+
+        .intro-letter:hover {
+            transform: scale(1.1) rotate(random(-5deg, 5deg));
+        }
+
+        /* Kelas saat huruf diklik (menyala) */
+        .intro-letter.lit {
+            color: var(--wood-red);
+            text-shadow: 0 0 15px var(--wood-red), 0 0 30px #ff6b6b;
+            border: 2px solid var(--wood-red);
+            filter: url(#rough-edge);
+            transform: scale(1.05);
+        }
+
+        /* Desain Elemen Portofolio */
+        .woodcut-btn {
+            background-color: var(--ink-black);
+            color: var(--paper-cream);
+            border: 4px solid var(--ink-black);
+            padding: 0.5rem 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .woodcut-btn:hover, .woodcut-btn.active {
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+            box-shadow: 4px 4px 0px var(--wood-red);
+            transform: translate(-2px, -2px);
+        }
+
+        .woodcut-card {
+            border: 6px solid var(--ink-black);
+            background: var(--paper-cream);
+            padding: 10px;
+            box-shadow: 8px 8px 0px var(--ink-black);
+            transition: transform 0.3s;
+        }
+
+        .woodcut-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px var(--wood-red);
+        }
+
+        .woodcut-img {
+            filter: grayscale(100%) contrast(150%) brightness(90%);
+            border: 2px solid var(--ink-black);
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        /* Menyembunyikan elemen berdasarkan filter */
+        .hide-item {
+            display: none !important;
+        }
+
+        /* Media Player styling */
+        #media-viewer iframe, #media-viewer img {
+            border: 8px solid var(--ink-black);
+            box-shadow: 12px 12px 0px var(--wood-red);
+            filter: url(#rough-edge);
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            object-fit: cover;
+            background: #000;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Definisi SVG Filter untuk efek tepi kasar -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+        <filter id="rough-edge">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+
+    <!-- 1. LAYAR AWAL INTERAKTIF (JABON MAIN YUK) -->
+    <div id="intro-screen">
+        <div class="text-center">
+            <p class="text-sm mb-4 tracking-widest uppercase opacity-70">Sentuh setiap huruf untuk memulai</p>
+            <div id="interactive-text" class="intro-text-container">
+                <!-- Huruf akan di-generate via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. KONTEN UTAMA PORTFOLIO (Tersembunyi Awalnya) -->
+    <div id="main-content" class="hidden opacity-0 transition-opacity duration-1000">
+        
+        <!-- Header / Menu Wajib -->
+        <header class="border-b-8 border-black p-6 sticky top-0 z-40 bg-[var(--paper-cream)] woodcut-edge">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-4xl font-woodcut font-bold">JABON PAGE</div>
+                <nav class="flex gap-4 md:gap-8 font-bold uppercase text-sm md:text-base">
+                    <a href="#beranda" class="hover:text-[var(--wood-red)] transition-colors">Beranda</a>
+                    <a href="#karya" class="hover:text-[var(--wood-red)] transition-colors">Karya</a>
+                    <a href="#media" class="hover:text-[var(--wood-red)] transition-colors">Media</a>
+                    <a href="#kontak" class="hover:text-[var(--wood-red)] transition-colors">Kontak</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Beranda / Hero Section -->
+        <section id="beranda" class="py-20 px-6 border-b-8 border-black">
+            <div class="max-w-4xl mx-auto text-center woodcut-edge">
+                <h1 class="text-5xl md:text-7xl mb-6 font-woodcut">CUKIL, TINTA, <span class="text-[var(--wood-red)]">CETAK.</span></h1>
+                <p class="text-lg md:text-xl font-bold leading-relaxed mb-8">
+                    Selamat datang di galeri karya grafis relief dan cetak saring. Setiap goresan adalah hasil pahatan kasar yang bercerita.
+                </p>
+                <a href="#karya" class="woodcut-btn inline-block woodcut-edge text-lg">Lihat Galeri</a>
+            </div>
+        </section>
+
+        <!-- Bagian Karya (4 Kategori) -->
+        <section id="karya" class="py-20 px-6 bg-black text-[var(--paper-cream)]">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-woodcut mb-10 text-center woodcut-edge">KARYA GRAFIS</h2>
+                
+                <!-- Filter Kategori -->
+                <div class="flex flex-wrap justify-center gap-4 mb-12" id="filter-container">
+                    <button class="woodcut-btn woodcut-edge active" data-filter="all">Semua</button>
+                    <button class="woodcut-btn woodcut-edge" data-filter="cukil-kayu">Cukil Kayu</button>
+                    <button class="woodcut-btn woodcut-edge" data-filter="linocut">Linocut</button>
+                    <button class="woodcut-btn woodcut-edge" data-filter="stempel">Stempel</button>
+                    <button class="woodcut-btn woodcut-edge" data-filter="sketsa">Sketsa</button>
+                </div>
+
+                <!-- Grid Karya -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
+                    <!-- Item 1 -->
+                    <div class="woodcut-card portfolio-item" data-category="cukil-kayu">
+                        <img src="https://picsum.photos/seed/wood1/400/300?grayscale" alt="Cukil Kayu" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Wajah Rimba</h3>
+                        <p class="text-black text-sm">Cukil Kayu (MDF) - 2024</p>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="woodcut-card portfolio-item" data-category="linocut">
+                        <img src="https://picsum.photos/seed/lino1/400/300?grayscale" alt="Linocut" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Kota Bising</h3>
+                        <p class="text-black text-sm">Linocut - 2023</p>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="woodcut-card portfolio-item" data-category="stempel">
+                        <img src="https://picsum.photos/seed/stamp1/400/300?grayscale" alt="Stempel" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Cap Persona</h3>
+                        <p class="text-black text-sm">Stempel Karet - 2023</p>
+                    </div>
+                    <!-- Item 4 -->
+                    <div class="woodcut-card portfolio-item" data-category="sketsa">
+                        <img src="https://picsum.photos/seed/sketch1/400/300?grayscale" alt="Sketsa" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Studi Kasar</h3>
+                        <p class="text-black text-sm">Tinta di Kertas - 2024</p>
+                    </div>
+                    <!-- Item 5 -->
+                    <div class="woodcut-card portfolio-item" data-category="cukil-kayu">
+                        <img src="https://picsum.photos/seed/wood2/400/300?grayscale" alt="Cukil Kayu 2" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Akar Pahit</h3>
+                        <p class="text-black text-sm">Cukil Kayu Jati - 2022</p>
+                    </div>
+                    <!-- Item 6 -->
+                    <div class="woodcut-card portfolio-item" data-category="linocut">
+                        <img src="https://picsum.photos/seed/lino2/400/300?grayscale" alt="Linocut 2" class="woodcut-img mb-4">
+                        <h3 class="text-xl font-woodcut text-black">Mata Malam</h3>
+                        <p class="text-black text-sm">Linocut - 2024</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bagian Pemutar Media -->
+        <section id="media" class="py-20 px-6 border-b-8 border-black text-center">
+            <h2 class="text-4xl md:text-5xl font-woodcut mb-10 woodcut-edge">PROSES KARYA</h2>
+            <div id="media-viewer" class="flex flex-col items-center justify-center">
+                <!-- Aman untuk GitHub: iframe YouTube menggunakan embed standar -->
+                <iframe src="https://www.youtube.com/embed/YpX-uL0R7O0?si=D370H-jLssF9C4d3&controls=1" 
+                        title="Proses Cukil Kayu" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>
+                <p class="mt-6 font-bold text-lg max-w-2xl">Dokumentasi video proses pencetakan karya grafis di studio JABON.</p>
+            </div>
+        </section>
+
+        <!-- Footer & Kontak -->
+        <footer id="kontak" class="py-12 px-6 bg-[var(--ink-black)] text-[var(--paper-cream)] border-t-8 border-[var(--wood-red)]">
+            <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 woodcut-edge">
+                <div>
+                    <h3 class="text-3xl font-woodcut mb-2">JABON PAGE</h3>
+                    <p class="text-sm">Hak Cipta &copy; 2024. Woodcut & Graphic Art.</p>
+                </div>
+                
+                <!-- Instagram Link -->
+                <div>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="woodcut-btn woodcut-edge inline-flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                        Instagram
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. LOGIKA LAYAR INTRO "JABON MAIN YUK" ---
+            const phrase = "JABON MAIN YUK";
+            const container = document.getElementById('interactive-text');
+            let litCount = 0;
+            const targetCount = phrase.replace(/\s/g, '').length; // Jumlah huruf tanpa spasi
+            
+            // Inisialisasi AudioContext (Hanya diizinkan setelah interaksi pengguna)
+            let audioCtx = null;
+
+            // Fungsi untuk membuat suara (Synthesizer Chiptune/Retro)
+            function playSound(index) {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // Membuat nada dasar berdasarkan indeks huruf agar nadanya berbeda-beda
+                const baseFreq = 220; // A3
+                const freq = baseFreq * Math.pow(1.05946, index * 2); // Naik beberapa semitone
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'square'; // Suara kasar cocok untuk gaya ukiran kayu
+                osc.frequency.value = freq;
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                // Envelope suara cepat (Beep/Bloop)
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+
+            // Membuat elemen huruf HTML
+            Array.from(phrase).forEach((char, index) => {
+                if (char === ' ') {
+                    // Spasi
+                    const space = document.createElement('div');
+                    space.style.width = '30px'; // Lebar spasi
+                    container.appendChild(space);
+                } else {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.className = 'intro-letter';
+                    
+                    // Event saat huruf diklik
+                    span.addEventListener('click', function() {
+                        if (!this.classList.contains('lit')) {
+                            this.classList.add('lit');
+                            playSound(index);
+                            litCount++;
+                            
+                            // Cek jika semua huruf sudah menyala
+                            if (litCount === targetCount) {
+                                setTimeout(revealMainContent, 800); // Tunggu sebentar lalu buka
+                            }
+                        } else {
+                            // Opsional: mainkan suara lagi jika diklik ulang
+                            playSound(index);
+                        }
+                    });
+                    
+                    container.appendChild(span);
+                }
+            });
+
+            // Fungsi untuk transisi ke halaman utama
+            function revealMainContent() {
+                const introScreen = document.getElementById('intro-screen');
+                const mainContent = document.getElementById('main-content');
+
+                introScreen.style.opacity = '0';
+                setTimeout(() => {
+                    introScreen.style.visibility = 'hidden';
+                    introScreen.style.display = 'none';
+                    
+                    mainContent.classList.remove('hidden');
+                    // Paksa reflow
+                    void mainContent.offsetWidth;
+                    mainContent.classList.remove('opacity-0');
+                    mainContent.classList.add('opacity-100');
+                    
+                    // Mainkan suara kencang tanda berhasil masuk
+                    if(audioCtx) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(110, audioCtx.currentTime); // Low A
+                        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5); // Slide up
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start();
+                        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                        osc.stop(audioCtx.currentTime + 0.5);
+                    }
+                }, 1000); // Sesuai dengan durasi CSS transition
+            }
+
+
+            // --- 2. LOGIKA FILTER KATEGORI KARYA ---
+            const filterBtns = document.querySelectorAll('#filter-container button');
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Hapus active class dari semua tombol
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Tambah active class ke tombol yang diklik
+                    btn.classList.add('active');
+
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    portfolioItems.forEach(item => {
+                        if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                            item.classList.remove('hide-item');
+                        } else {
+                            item.classList.add('hide-item');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
